@@ -1,0 +1,355 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.gov.ph/schemas/saln-2025.schema.json",
+  "title": "SALN 2025",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "form_metadata",
+    "declarant",
+    "assets",
+    "liabilities",
+    "net_worth_summary",
+    "certification"
+  ],
+
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+
+    "form_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["compliance_type", "as_of_date", "filing_type"],
+      "properties": {
+        "form_type": {
+          "type": "string",
+          "const": "SALN_2025"
+        },
+        "compliance_type": {
+          "type": "string",
+          "enum": ["ASSUMPTION", "ANNUAL", "EXIT"]
+        },
+        "as_of_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "filing_type": {
+          "type": "string",
+          "enum": ["JOINT", "SEPARATE", "NOT_APPLICABLE"]
+        },
+        "csc_resolution_no": {
+          "type": ["string", "null"]
+        },
+        "promulgated_on": {
+          "type": ["string", "null"],
+          "format": "date"
+        }
+      }
+    },
+
+    "declarant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["personal_information"],
+      "properties": {
+        "personal_information": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "last_name",
+            "first_name",
+            "position",
+            "agency_office",
+            "office_address"
+          ],
+          "properties": {
+            "last_name": { "type": "string", "minLength": 1 },
+            "first_name": { "type": "string", "minLength": 1 },
+            "middle_initial": {
+              "type": ["string", "null"],
+              "maxLength": 5
+            },
+            "position": { "type": "string", "minLength": 1 },
+            "agency_office": { "type": "string", "minLength": 1 },
+            "office_address": { "type": "string", "minLength": 1 },
+            "government_id": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["type", "id_number", "date_issued"],
+              "properties": {
+                "type": { "type": "string" },
+                "id_number": { "type": "string" },
+                "date_issued": {
+                  "type": "string",
+                  "format": "date"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "spouse": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "is_public_official": { "type": "boolean" },
+        "last_name": { "type": "string" },
+        "first_name": { "type": "string" },
+        "middle_initial": { "type": ["string", "null"] },
+        "position": { "type": ["string", "null"] },
+        "agency_office": { "type": ["string", "null"] },
+        "office_address": { "type": ["string", "null"] }
+      }
+    },
+
+    "children_below_18": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "age"],
+        "properties": {
+          "name": { "type": "string" },
+          "age": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 17
+          }
+        }
+      }
+    },
+
+    "assets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["real_properties", "personal_properties"],
+      "properties": {
+        "real_properties": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "description",
+              "kind",
+              "exact_location",
+              "assessed_value",
+              "fair_market_value",
+              "acquisition"
+            ],
+            "properties": {
+              "description": { "type": "string" },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "RESIDENTIAL",
+                  "COMMERCIAL",
+                  "INDUSTRIAL",
+                  "AGRICULTURAL",
+                  "MIXED_USE"
+                ]
+              },
+              "exact_location": { "type": "string" },
+              "assessed_value": {
+                "type": "number",
+                "minimum": 0
+              },
+              "fair_market_value": {
+                "type": "number",
+                "minimum": 0
+              },
+              "acquisition": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["year", "mode", "cost"],
+                "properties": {
+                  "year": {
+                    "type": "integer",
+                    "minimum": 1900
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "PURCHASE",
+                      "INHERITANCE",
+                      "DONATION",
+                      "OTHER"
+                    ]
+                  },
+                  "cost": {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+
+        "personal_properties": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "description",
+              "acquisition_year",
+              "acquisition_cost"
+            ],
+            "properties": {
+              "description": { "type": "string" },
+              "acquisition_year": {
+                "type": "integer",
+                "minimum": 1900
+              },
+              "acquisition_cost": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          }
+        },
+
+        "totals": {
+          "type": "object",
+          "readOnly": true,
+          "properties": {
+            "real_property_subtotal": { "type": "number" },
+            "personal_property_subtotal": { "type": "number" },
+            "total_assets": { "type": "number" }
+          }
+        }
+      }
+    },
+
+    "liabilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "nature",
+          "creditor_name",
+          "outstanding_balance"
+        ],
+        "properties": {
+          "nature": { "type": "string" },
+          "creditor_name": { "type": "string" },
+          "outstanding_balance": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+
+    "net_worth_summary": {
+      "type": "object",
+      "readOnly": true,
+      "properties": {
+        "total_assets": { "type": "number" },
+        "total_liabilities": { "type": "number" },
+        "net_worth": { "type": "number" }
+      }
+    },
+
+    "business_interests": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["has_business_interest"],
+      "properties": {
+        "has_business_interest": {
+          "type": "boolean"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "entity_name",
+              "business_address",
+              "nature_of_interest",
+              "date_acquired"
+            ],
+            "properties": {
+              "entity_name": { "type": "string" },
+              "business_address": { "type": "string" },
+              "nature_of_interest": { "type": "string" },
+              "date_acquired": {
+                "type": "string",
+                "format": "date"
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "relatives_in_government": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["has_relatives"],
+      "properties": {
+        "has_relatives": {
+          "type": "boolean"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "relative_name",
+              "relationship",
+              "position",
+              "agency_office"
+            ],
+            "properties": {
+              "relative_name": { "type": "string" },
+              "relationship": { "type": "string" },
+              "position": { "type": "string" },
+              "agency_office": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+
+    "certification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["date_signed", "authorization_to_verify"],
+      "properties": {
+        "date_signed": {
+          "type": "string",
+          "format": "date"
+        },
+        "authorization_to_verify": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    },
+
+    "notarization": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "subscribed_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "administering_officer_name": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
