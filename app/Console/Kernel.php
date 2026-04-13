@@ -12,8 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // Delete users older than 5 days, run daily at midnight
-        $schedule->command('users:delete-old')->dailyAt('00:00');
+        // Clean up inactive users' form data daily at midnight
+        $schedule->command('users:cleanup-inactive')->dailyAt('00:00');
     }
 
     /**
