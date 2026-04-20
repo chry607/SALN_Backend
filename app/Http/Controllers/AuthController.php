@@ -49,7 +49,6 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'required|email',
             'code' => 'required|string|size:6',
-            'password' => 'required|string|min:8',
         ]);
 
         $verification = DB::table('verification_codes')
@@ -82,27 +81,25 @@ class AuthController extends Controller
                 // Delete all user's form data
                 $user->forms()->delete();
             }
-            
-            // Update password
-            $user->password = Hash::make($request->password);
             $user->last_activity_at = now();
             $user->save();
         } else {
-            // Create new user
+            // Create new user (no password required)
             $user = User::create([
                 'name' => explode('@', $request->email)[0],
                 'email' => $request->email,
-                'password' => Hash::make($request->password),
                 'last_activity_at' => now(),
             ]);
         }
 
-        Auth::login($user);
-
         if ($wasInactive) {
-            return redirect()->route('dashboard')->with('inactivity_notice', true);
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return redirect()->route('login')->with('session_expired', 'Your session expired after 5 days of inactivity. Your data has been cleared for privacy. Please log in again.');
         }
 
+        Auth::login($user);
         return redirect()->route('dashboard');
     }
 
