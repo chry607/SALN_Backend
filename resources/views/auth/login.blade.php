@@ -129,7 +129,7 @@
             </div>
         </div>
 
-        <!-- Step 2: Code Verification & Password -->
+        <!-- Step 2: Code Verification -->
         <div id="verification-step" style="display: none;">
             <form action="{{ route('verify.login') }}" method="POST">
                 @csrf
@@ -151,21 +151,6 @@
                         Enter the 6-digit code sent to your email
                     </p>
                     <p id="dev-code-display" style="display: none; color: var(--success-color); font-weight: 600; margin-top: 8px; padding: 8px; background-color: rgba(76, 175, 80, 0.1); border-radius: var(--radius-sm);"></p>
-                </div>
-
-                <div class="form-group">
-                    <label for="password">Password *</label>
-                    <input 
-                        type="password" 
-                        id="password" 
-                        name="password" 
-                        required 
-                        minlength="8"
-                        placeholder="Minimum 8 characters"
-                    >
-                    <p class="form-help">
-                        Create a password or enter your existing one
-                    </p>
                 </div>
 
                 <button type="submit" class="btn btn-primary" style="width: 100%;">
@@ -237,7 +222,6 @@
                     devCodeDisplay.innerHTML = `<strong>Development Code:</strong> ${data.dev_code}`;
                     devCodeDisplay.style.display = 'block';
                 }
-                
                 // Focus on code input
                 document.getElementById('code').focus();
             } else {
@@ -268,12 +252,12 @@
         e.target.value = e.target.value.replace(/[^0-9]/g, '');
     });
 
-    // Auto-submit when 6 digits are entered (optional UX enhancement)
-    codeInput.addEventListener('input', (e) => {
-        if (e.target.value.length === 6) {
-            document.getElementById('password').focus();
-        }
-    });
+    // Optionally, auto-submit or enable the button when 6 digits are entered
+    // codeInput.addEventListener('input', (e) => {
+    //     if (e.target.value.length === 6) {
+    //         // Optionally submit or enable button
+    //     }
+    // });
 </script>
 @endsection
 @endsection
