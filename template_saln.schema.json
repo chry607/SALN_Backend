@@ -63,7 +63,7 @@
         "type": "object",
         "properties": {
           "name": { "type": ["string", "null"] },
-          "age": { "type": ["string", "null"] }
+          "age": { "type": ["string", "null", "number"] }
         }
       }
     },
@@ -78,14 +78,14 @@
               "description": { "type": ["string", "null"] },
               "kind": { "type": ["string", "null"] },
               "exact_location": { "type": ["string", "null"] },
-              "assessed_value": { "type": ["string", "null"] },
-              "fair_market_value": { "type": ["string", "null"] },
+              "assessed_value": { "type": ["string", "null", "number"] },
+              "fair_market_value": { "type": ["string", "null", "number"] },
               "acquisition": {
                 "type": "object",
                 "properties": {
                   "year": { "type": ["string", "null"] },
                   "mode": { "type": ["string", "null"] },
-                  "cost": { "type": ["string", "null"] }
+                  "cost": { "type": ["string", "null", "number"] }
                 }
               }
             }
@@ -98,7 +98,7 @@
             "properties": {
               "description": { "type": ["string", "null"] },
               "acquisition_year": { "type": ["string", "null"] },
-              "acquisition_cost": { "type": ["string", "null"] }
+              "acquisition_cost": { "type": ["string", "null", "number"] }
             }
           }
         }
@@ -112,7 +112,7 @@
         "properties": {
           "nature": { "type": ["string", "null"] },
           "creditor_name": { "type": ["string", "null"] },
-          "outstanding_balance": { "type": ["string", "null"] }
+          "outstanding_balance": { "type": ["string", "null", "number"] }
         }
       }
     },
