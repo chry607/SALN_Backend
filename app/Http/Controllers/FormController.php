@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\JsonSchemaValidator;
 use App\Models\Form;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,9 +20,15 @@ class FormController extends Controller
 
     public function save(Request $request)
     {
+
         $request->validate([
             'form_data' => 'required|array',
         ]);
+
+        // Validate against the new JSON schema, but do not block saving if incomplete
+        $schemaPath = base_path('template_saln.schema.json');
+        $schemaErrors = JsonSchemaValidator::validate($request->form_data, $schemaPath);
+        // Only warn about errors, do not block saving
 
         $user = Auth::user();
         $user->last_activity_at = now();
@@ -44,6 +51,7 @@ class FormController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Form saved successfully.',
+            'schema_errors' => $schemaErrors,
         ]);
     }
 
@@ -63,6 +71,7 @@ class FormController extends Controller
 
     public function importJson(Request $request)
     {
+
         $request->validate([
             'file' => 'required|file|mimes:json',
         ]);
@@ -72,6 +81,13 @@ class FormController extends Controller
 
         if (!$data) {
             return back()->withErrors(['file' => 'Invalid JSON file.']);
+        }
+
+        // Validate against the new JSON schema
+        $schemaPath = base_path('template_saln.schema.json');
+        $schemaErrors = JsonSchemaValidator::validate($data, $schemaPath);
+        if (!empty($schemaErrors)) {
+            return back()->withErrors(['file' => 'Schema validation failed: ' . implode('; ', $schemaErrors)]);
         }
 
         $user = Auth::user();
@@ -122,7 +138,7 @@ class FormController extends Controller
         $user->last_activity_at = now();
         $user->save();
 
-        // TODO: Implement PDF generation logic using the template_saln.json structure
+        // TODO: Implement PDF generation logic using the new template_saln.schema.json structure
         // This would use a library like DomPDF or Snappy to generate the official SALN PDF
         
         return back()->with('info', 'PDF generation coming soon.');

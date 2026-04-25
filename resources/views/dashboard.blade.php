@@ -6,6 +6,23 @@
 <style>
     .form-section {
         background-color: var(--bg-white);
+    <script>
+        // Auto-logout after 1 hour (3600000 ms) of inactivity
+        (function() {
+            let logoutTimer;
+            const logoutAfter = 60 * 60 * 1000; // 1 hour
+            function resetTimer() {
+                clearTimeout(logoutTimer);
+                logoutTimer = setTimeout(() => {
+                    window.location.href = '/logout';
+                }, logoutAfter);
+            }
+            ['click', 'mousemove', 'keydown', 'scroll', 'touchstart'].forEach(evt => {
+                window.addEventListener(evt, resetTimer, true);
+            });
+            resetTimer();
+        })();
+    </script>
         border: 1px solid var(--border-color);
         border-radius: var(--radius-md);
         margin-bottom: 24px;
@@ -365,7 +382,7 @@
 
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
         <h2 style="margin: 0;">SALN Form 2025</h2>
-        <!-- <span class="status-indicator" id="save-status">Draft</span> -->
+        <span id="last-saved-time" style="font-size: 0.95em; color: var(--text-secondary);"></span>
     </div>
 
     <form id="saln-form">
@@ -400,10 +417,6 @@
                             <option value="SEPARATE">Separate</option>
                             <option value="NOT_APPLICABLE">Not Applicable</option>
                         </select>
-                    </div>
-                    <div class="form-group">
-                        <label>CSC Resolution No.</label>
-                        <input type="text" name="form_metadata[csc_resolution_no]">
                     </div>
                 </div>
             </div>
@@ -464,44 +477,12 @@
         <!-- Spouse Information Section -->
         <div class="form-section">
             <div class="section-header" onclick="toggleSection(this)">
-<h3>Spouse Information</h3>
+                <h3>Spouse(s) Information</h3>
                 <span class="section-toggle">+</span>
             </div>
             <div class="section-content">
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" name="has_spouse" onchange="toggleSpouseFields(this)"> I have a spouse
-                    </label>
-                </div>
-                <div id="spouse-fields" style="display: none;">
-                    <div class="form-row-3">
-                        <div class="form-group">
-                            <label>Last Name</label>
-                            <input type="text" name="spouse[last_name]">
-                        </div>
-                        <div class="form-group">
-                            <label>First Name</label>
-                            <input type="text" name="spouse[first_name]">
-                        </div>
-                        <div class="form-group">
-                            <label>Middle Initial</label>
-                            <input type="text" name="spouse[middle_initial]" maxlength="5">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" name="spouse[is_public_official]"> Is a public official
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label>Position</label>
-                        <input type="text" name="spouse[position]">
-                    </div>
-                    <div class="form-group">
-                        <label>Agency/Office</label>
-                        <input type="text" name="spouse[agency_office]">
-                    </div>
-                </div>
+                <div id="spouses-list"></div>
+                <button type="button" class="btn btn-add-item" onclick="addSpouse()">+ Add Spouse</button>
             </div>
         </div>
 
@@ -625,28 +606,18 @@
     </div>
 </div>
 
-<!-- Footer -->
-<footer style="background-color: var(--bg-light); border-top: 1px solid var(--border-color); padding: 32px 0; margin-top: 48px; box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);">
-    <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
-            <p style="font-size: 13px; color: var(--text-muted); margin: 0;">
-                © {{ date('Y') }} SALN Filing System | <a href="#" style="color: var(--text-muted); text-decoration: underline;">Privacy Policy</a> | <a href="#" style="color: var(--text-muted); text-decoration: underline;">Help</a>
-            </p>
-            <p style="font-size: 13px; color: var(--text-muted); margin: 0;">
-                <strong>Last saved:</strong> <span id="last-saved-time">Never</span>
-            </p>
-        </div>
-    </div>
-</footer>
+
 
 @section('scripts')
 <script>
+
 let childCounter = 0;
 let realPropertyCounter = 0;
 let personalPropertyCounter = 0;
 let liabilityCounter = 0;
 let businessCounter = 0;
 let relativeCounter = 0;
+let spouseCounter = 0;
 
 function closeInactivityModal() {
     document.getElementById('inactivity-modal').classList.remove('active');
@@ -665,8 +636,46 @@ function toggleSection(header) {
     }
 }
 
-function toggleSpouseFields(checkbox) {
-    document.getElementById('spouse-fields').style.display = checkbox.checked ? 'block' : 'none';
+
+function addSpouse() {
+    const html = `
+        <div class="repeater-item" id="spouse-${spouseCounter}">
+            <div class="form-row-3">
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" name="spouses[${spouseCounter}][last_name]">
+                </div>
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" name="spouses[${spouseCounter}][first_name]">
+                </div>
+                <div class="form-group">
+                    <label>Middle Initial</label>
+                    <input type="text" name="spouses[${spouseCounter}][middle_initial]" maxlength="5">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="spouses[${spouseCounter}][is_public_official]"> Is a public official
+                </label>
+            </div>
+            <div class="form-group">
+                <label>Position</label>
+                <input type="text" name="spouses[${spouseCounter}][position]">
+            </div>
+            <div class="form-group">
+                <label>Agency/Office</label>
+                <input type="text" name="spouses[${spouseCounter}][agency_office]">
+            </div>
+            <div class="form-group">
+                <label>Office Address</label>
+                <input type="text" name="spouses[${spouseCounter}][office_address]">
+            </div>
+            <button type="button" class="repeater-remove" onclick="removeItem('spouse-${spouseCounter}')">&times;</button>
+        </div>
+    `;
+    document.getElementById('spouses-list').insertAdjacentHTML('beforeend', html);
+    spouseCounter++;
 }
 
 function toggleBusinessFields(checkbox) {
@@ -874,12 +883,131 @@ async function saveForm() {
     const formData = new FormData(form);
     const data = {};
     
-    // Convert FormData to nested object
+
+    // Convert FormData to nested object, handling checkboxes and required structure
     for (let [key, value] of formData.entries()) {
-        setNestedValue(data, key, value);
+        // Convert checkboxes ("on") to true, and missing to false later
+        if (value === "on") {
+            setNestedValue(data, key, true);
+        } else if (key.endsWith('[is_public_official]') || key.endsWith('[has_business_interest]') || key.endsWith('[has_relatives]') || key === 'certification[authorization_to_verify]') {
+            // Coerce to boolean if not already
+            setNestedValue(data, key, value === 'true' || value === true);
+        } else {
+            setNestedValue(data, key, value);
+        }
+    }
+    // Coerce boolean fields in top-level objects/arrays
+    if (Array.isArray(data.spouses)) {
+        data.spouses = data.spouses.map(spouse => ({
+            is_public_official: !!spouse.is_public_official,
+            last_name: spouse.last_name || null,
+            first_name: spouse.first_name || null,
+            middle_initial: spouse.middle_initial || null,
+            position: spouse.position || null,
+            agency_office: spouse.agency_office || null,
+            office_address: spouse.office_address || null
+        }));
+    }
+    if (Array.isArray(data.children_below_18)) {
+        data.children_below_18 = data.children_below_18.map(child => ({
+            name: child.name || null,
+            age: child.age ? Number(child.age) : null
+        }));
+    }
+    if (Array.isArray(data.assets.real_properties)) {
+        data.assets.real_properties = data.assets.real_properties.map(prop => ({
+            description: prop.description || null,
+            kind: prop.kind || null,
+            exact_location: prop.exact_location || null,
+            assessed_value: prop.assessed_value ? Number(prop.assessed_value) : null,
+            fair_market_value: prop.fair_market_value ? Number(prop.fair_market_value) : null,
+            acquisition: prop.acquisition ? {
+                year: prop.acquisition.year || null,
+                mode: prop.acquisition.mode || null,
+                cost: prop.acquisition.cost ? Number(prop.acquisition.cost) : null
+            } : { year: null, mode: null, cost: null }
+        }));
+    }
+    if (Array.isArray(data.assets.personal_properties)) {
+        data.assets.personal_properties = data.assets.personal_properties.map(prop => ({
+            description: prop.description || null,
+            acquisition_year: prop.acquisition_year || null,
+            acquisition_cost: prop.acquisition_cost ? Number(prop.acquisition_cost) : null
+        }));
+    }
+    if (Array.isArray(data.liabilities)) {
+        data.liabilities = data.liabilities.map(l => ({
+            nature: l.nature || null,
+            creditor_name: l.creditor_name || null,
+            outstanding_balance: l.outstanding_balance ? Number(l.outstanding_balance) : null
+        }));
+    }
+    if (Array.isArray(data.business_interests.entries)) {
+        data.business_interests.entries = data.business_interests.entries.map(e => ({
+            entity_name: e.entity_name || null,
+            business_address: e.business_address || null,
+            nature_of_interest: e.nature_of_interest || null,
+            date_acquired: e.date_acquired || null
+        }));
+    }
+    if (Array.isArray(data.relatives_in_government.entries)) {
+        data.relatives_in_government.entries = data.relatives_in_government.entries.map(e => ({
+            relative_name: e.relative_name || null,
+            relationship: e.relationship || null,
+            position: e.position || null,
+            agency_office: e.agency_office || null
+        }));
+    }
+    if (data.business_interests) {
+        data.business_interests.has_business_interest = !!data.business_interests.has_business_interest;
+    }
+    if (data.relatives_in_government) {
+        data.relatives_in_government.has_relatives = !!data.relatives_in_government.has_relatives;
+    }
+    if (data.certification) {
+        data.certification.authorization_to_verify = !!data.certification.authorization_to_verify;
     }
 
+    // Add missing schema_version and form_type if not present
+    if (!data.schema_version) data.schema_version = "1.0.0";
+    if (!data.form_metadata) data.form_metadata = {};
+    if (!data.form_metadata.form_type) data.form_metadata.form_type = "SALN_2025";
+
+    // Ensure required structure and types for schema
+    // Add schema_version
+    data.schema_version = "1.0.0";
+    // Add form_type
+    if (!data.form_metadata) data.form_metadata = {};
+    data.form_metadata.form_type = "SALN_2025";
+
+    // Ensure arrays/objects exist
+    if (!Array.isArray(data.spouses)) data.spouses = [];
+    if (!Array.isArray(data.children_below_18)) data.children_below_18 = [];
+    if (!data.assets) data.assets = {};
+    if (!Array.isArray(data.assets.real_properties)) data.assets.real_properties = [];
+    if (!Array.isArray(data.assets.personal_properties)) data.assets.personal_properties = [];
+    if (!Array.isArray(data.liabilities)) data.liabilities = [];
+    if (!data.business_interests) data.business_interests = {};
+    if (!Array.isArray(data.business_interests.entries)) data.business_interests.entries = [];
+    if (typeof data.business_interests.has_business_interest !== 'boolean') data.business_interests.has_business_interest = false;
+    if (!data.relatives_in_government) data.relatives_in_government = {};
+    if (!Array.isArray(data.relatives_in_government.entries)) data.relatives_in_government.entries = [];
+    if (typeof data.relatives_in_government.has_relatives !== 'boolean') data.relatives_in_government.has_relatives = false;
+    if (!data.certification) data.certification = {};
+    if (typeof data.certification.authorization_to_verify !== 'boolean') data.certification.authorization_to_verify = false;
+
+    // Fix checkboxes that are missing from FormData (unchecked)
+    // Find all checkbox names and set to false if not present
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        const path = cb.name;
+        // Only set if not already true
+        if (path && !formData.has(path)) {
+            setNestedValue(data, path, false);
+        }
+    });
+
     const statusIndicator = document.getElementById('save-status');
+    const lastSavedTime = document.getElementById('last-saved-time');
     statusIndicator.textContent = 'Saving...';
 
     try {
@@ -896,24 +1024,30 @@ async function saveForm() {
         const result = await response.json();
 
         if (result.success) {
-            statusIndicator.textContent = 'Saved';
-            statusIndicator.classList.add('saved-indicator');
-            
+            if (statusIndicator) {
+                statusIndicator.textContent = 'Saved';
+                statusIndicator.classList.add('saved-indicator');
+            }
             // Update last saved time
-            document.getElementById('last-saved-time').textContent = new Date().toLocaleString();
-            
+            if (lastSavedTime) {
+                lastSavedTime.textContent = new Date().toLocaleString();
+            }
             setTimeout(() => {
-                statusIndicator.classList.remove('saved-indicator');
-                statusIndicator.textContent = 'Draft';
+                if (statusIndicator) {
+                    statusIndicator.classList.remove('saved-indicator');
+                    statusIndicator.textContent = 'Draft';
+                }
             }, 2000);
         }
     } catch (error) {
         console.error('Save error:', error);
         alert('Failed to save. Please try again.');
-        statusIndicator.textContent = 'Error';
-        setTimeout(() => {
-            statusIndicator.textContent = 'Draft';
-        }, 2000);
+        if (statusIndicator) {
+            statusIndicator.textContent = 'Error';
+            setTimeout(() => {
+                statusIndicator.textContent = 'Draft';
+            }, 2000);
+        }
     }
 }
 
@@ -1006,19 +1140,18 @@ function populateForm(data) {
         }
     }
     
-    // Spouse Information
-    if (data.spouse) {
-        const hasSpouseCheckbox = document.querySelector('[name="has_spouse"]');
-        if (hasSpouseCheckbox) {
-            hasSpouseCheckbox.checked = true;
-            toggleSpouseFields(hasSpouseCheckbox);
-        }
-        setFieldValue('spouse[last_name]', data.spouse.last_name);
-        setFieldValue('spouse[first_name]', data.spouse.first_name);
-        setFieldValue('spouse[middle_initial]', data.spouse.middle_initial);
-        setFieldValue('spouse[is_public_official]', data.spouse.is_public_official);
-        setFieldValue('spouse[position]', data.spouse.position);
-        setFieldValue('spouse[agency_office]', data.spouse.agency_office);
+    // Spouses Information (array)
+    if (data.spouses && Array.isArray(data.spouses)) {
+        data.spouses.forEach((spouse, index) => {
+            addSpouse();
+            setFieldValue(`spouses[${index}][last_name]`, spouse.last_name);
+            setFieldValue(`spouses[${index}][first_name]`, spouse.first_name);
+            setFieldValue(`spouses[${index}][middle_initial]`, spouse.middle_initial);
+            setFieldValue(`spouses[${index}][is_public_official]`, spouse.is_public_official);
+            setFieldValue(`spouses[${index}][position]`, spouse.position);
+            setFieldValue(`spouses[${index}][agency_office]`, spouse.agency_office);
+            setFieldValue(`spouses[${index}][office_address]`, spouse.office_address);
+        });
     }
     
     // Children

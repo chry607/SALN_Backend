@@ -1,0 +1,113 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SALN Form",
+  "type": "object",
+  "properties": {
+    "schema_version": { "type": "string" },
+    "form_metadata": {
+      "type": "object",
+      "properties": {
+        "form_type": { "type": "string" },
+        "compliance_type": { "type": ["string", "null"] },
+        "as_of_date": { "type": ["string", "null"], "format": "date" },
+        "filing_type": { "type": ["string", "null"] }
+      },
+      "required": ["form_type", "compliance_type", "as_of_date", "filing_type"]
+    },
+    "declarant": {
+      "type": "object",
+      "properties": {
+        "personal_information": {
+          "type": "object",
+          "properties": {
+            "last_name": { "type": "string" },
+            "first_name": { "type": "string" },
+            "middle_initial": { "type": "string" },
+            "position": { "type": "string" },
+            "agency_office": { "type": "string" },
+            "office_address": { "type": "string" },
+            "government_id": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string" },
+                "id_number": { "type": "string" },
+                "date_issued": { "type": "string", "format": "date" }
+              },
+              "required": ["type", "id_number", "date_issued"]
+            }
+          },
+          "required": ["last_name", "first_name", "middle_initial", "position", "agency_office", "office_address", "government_id"]
+        }
+      },
+      "required": ["personal_information"]
+    },
+    "spouses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "is_public_official": { "type": "boolean" },
+          "last_name": { "type": "string" },
+          "first_name": { "type": "string" },
+          "middle_initial": { "type": "string" },
+          "position": { "type": "string" },
+          "agency_office": { "type": "string" },
+          "office_address": { "type": "string" }
+        },
+        "required": ["is_public_official", "last_name", "first_name", "middle_initial", "position", "agency_office", "office_address"]
+      }
+    },
+    "children_below_18": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "assets": {
+      "type": "object",
+      "properties": {
+        "real_properties": { "type": "array", "items": { "type": "object" } },
+        "personal_properties": { "type": "array", "items": { "type": "object" } }
+      },
+      "required": ["real_properties", "personal_properties"]
+    },
+    "liabilities": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "business_interests": {
+      "type": "object",
+      "properties": {
+        "has_business_interest": { "type": "boolean" },
+        "entries": { "type": "array", "items": { "type": "object" } }
+      },
+      "required": ["has_business_interest", "entries"]
+    },
+    "relatives_in_government": {
+      "type": "object",
+      "properties": {
+        "has_relatives": { "type": "boolean" },
+        "entries": { "type": "array", "items": { "type": "object" } }
+      },
+      "required": ["has_relatives", "entries"]
+    },
+    "certification": {
+      "type": "object",
+      "properties": {
+        "date_signed": { "type": ["string", "null"], "format": "date" },
+        "authorization_to_verify": { "type": "boolean" }
+      },
+      "required": ["date_signed", "authorization_to_verify"]
+    }
+  },
+  "required": [
+    "schema_version",
+    "form_metadata",
+    "declarant",
+    "spouses",
+    "children_below_18",
+    "assets",
+    "liabilities",
+    "business_interests",
+    "relatives_in_government",
+    "certification"
+  ]
+}
