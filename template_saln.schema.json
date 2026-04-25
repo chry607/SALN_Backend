@@ -20,18 +20,18 @@
         "personal_information": {
           "type": "object",
           "properties": {
-            "last_name": { "type": "string" },
-            "first_name": { "type": "string" },
-            "middle_initial": { "type": "string" },
-            "position": { "type": "string" },
-            "agency_office": { "type": "string" },
-            "office_address": { "type": "string" },
+            "last_name": { "type": ["string", "null"] },
+            "first_name": { "type": ["string", "null"] },
+            "middle_initial": { "type": ["string", "null"] },
+            "position": { "type": ["string", "null"] },
+            "agency_office": { "type": ["string", "null"] },
+            "office_address": { "type": ["string", "null"] },
             "government_id": {
               "type": "object",
               "properties": {
-                "type": { "type": "string" },
-                "id_number": { "type": "string" },
-                "date_issued": { "type": "string", "format": "date" }
+                "type": { "type": ["string", "null"] },
+                "id_number": { "type": ["string", "null"] },
+                "date_issued": { "type": ["string", "null"], "format": "date" }
               },
               "required": ["type", "id_number", "date_issued"]
             }
@@ -47,37 +47,91 @@
         "type": "object",
         "properties": {
           "is_public_official": { "type": "boolean" },
-          "last_name": { "type": "string" },
-          "first_name": { "type": "string" },
-          "middle_initial": { "type": "string" },
-          "position": { "type": "string" },
-          "agency_office": { "type": "string" },
-          "office_address": { "type": "string" }
+          "last_name": { "type": ["string", "null"] },
+          "first_name": { "type": ["string", "null"] },
+          "middle_initial": { "type": ["string", "null"] },
+          "position": { "type": ["string", "null"] },
+          "agency_office": { "type": ["string", "null"] },
+          "office_address": { "type": ["string", "null"] }
         },
         "required": ["is_public_official", "last_name", "first_name", "middle_initial", "position", "agency_office", "office_address"]
       }
     },
     "children_below_18": {
       "type": "array",
-      "items": { "type": "object" }
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": ["string", "null"] },
+          "age": { "type": ["string", "null"] }
+        }
+      }
     },
     "assets": {
       "type": "object",
       "properties": {
-        "real_properties": { "type": "array", "items": { "type": "object" } },
-        "personal_properties": { "type": "array", "items": { "type": "object" } }
+        "real_properties": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "description": { "type": ["string", "null"] },
+              "kind": { "type": ["string", "null"] },
+              "exact_location": { "type": ["string", "null"] },
+              "assessed_value": { "type": ["string", "null"] },
+              "fair_market_value": { "type": ["string", "null"] },
+              "acquisition": {
+                "type": "object",
+                "properties": {
+                  "year": { "type": ["string", "null"] },
+                  "mode": { "type": ["string", "null"] },
+                  "cost": { "type": ["string", "null"] }
+                }
+              }
+            }
+          }
+        },
+        "personal_properties": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "description": { "type": ["string", "null"] },
+              "acquisition_year": { "type": ["string", "null"] },
+              "acquisition_cost": { "type": ["string", "null"] }
+            }
+          }
+        }
       },
       "required": ["real_properties", "personal_properties"]
     },
     "liabilities": {
       "type": "array",
-      "items": { "type": "object" }
+      "items": {
+        "type": "object",
+        "properties": {
+          "nature": { "type": ["string", "null"] },
+          "creditor_name": { "type": ["string", "null"] },
+          "outstanding_balance": { "type": ["string", "null"] }
+        }
+      }
     },
     "business_interests": {
       "type": "object",
       "properties": {
         "has_business_interest": { "type": "boolean" },
-        "entries": { "type": "array", "items": { "type": "object" } }
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "entity_name": { "type": ["string", "null"] },
+              "business_address": { "type": ["string", "null"] },
+              "nature_of_interest": { "type": ["string", "null"] },
+              "date_acquired": { "type": ["string", "null"] }
+            }
+          }
+        }
       },
       "required": ["has_business_interest", "entries"]
     },
@@ -85,7 +139,18 @@
       "type": "object",
       "properties": {
         "has_relatives": { "type": "boolean" },
-        "entries": { "type": "array", "items": { "type": "object" } }
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "relative_name": { "type": ["string", "null"] },
+              "relationship": { "type": ["string", "null"] },
+              "position": { "type": ["string", "null"] },
+              "agency_office": { "type": ["string", "null"] }
+            }
+          }
+        }
       },
       "required": ["has_relatives", "entries"]
     },
